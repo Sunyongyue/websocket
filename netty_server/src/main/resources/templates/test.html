@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <title>layui</title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}"  media="all"/>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+<div style="margin-bottom: 5px;">
+
+
+</div>
+
+<!--<div class="layui-btn-group demoTable">
+    <button class="layui-btn" data-type="getCheckData">获取选中行数据</button>
+    <button class="layui-btn" data-type="getCheckLength">获取选中数目</button>
+    <button class="layui-btn" data-type="isAll">验证是否全选</button>
+</div>-->
+<div class="demoTable">
+    搜索商户：
+    <div class="layui-inline">
+        <input class="layui-input" name="keyword" id="demoReload" autocomplete="off"/>
+    </div>
+    <button class="layui-btn" data-type="reload">搜索</button>
+</div>
+<table class="layui-table" lay-data="{width: 892, height:330, url:'/test1', page:true, id:'idTest',toolbar:'default',defaultToolbar:['filter', 'print','exports'] }" lay-filter="demo">
+    <thead>
+    <tr>
+        <th lay-data="{type:'checkbox', fixed: 'left'}"></th>
+        <th lay-data="{field:'id', width:80, sort: true, fixed: true}">ID</th>
+        <th lay-data="{field:'testname', width:80}">用户名</th>
+        <th lay-data="{field:'testpassword', width:80}">密码</th>
+        <th lay-data="{fixed: 'right', width:178, align:'center', toolbar: '#barDemo'}">操作</th>
+    </tr>
+    </thead>
+</table>
+<div id="add-main" style="display: none;">
+    <div class="my-form">
+        <form class="layui-form" action="/user/add" method="POST" lay-skin="line">
+            <div class="layui-form-item my-form-item">
+                <label class="layui-form-label layui-icon">&#xe770;</label>
+                <div class="layui-input-inline">
+                    <input id="name" type="text" name="name" lay-verify="required" placeholder="请输入用户名" autocomplete="off"
+                           class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item my-form-item">
+                <label class="layui-form-label layui-icon">&#xe673;</label>
+                <div class="layui-input-inline">
+                    <input id="password" type="text" name="password" lay-verify="required" placeholder="请输入密码" autocomplete="off"
+                           class="layui-input"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+
+</script>
+
+
+<script th:src="@{/layui/layui.all.js}" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        //监听表格复选框选择
+        table.on('checkbox(demo)', function(obj){
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                /*layer.alert('编辑行：<br/>'+ JSON.stringify(data))*/
+
+            }
+        });
+        //监听头工具栏事件
+        table.on('toolbar(demo)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id)
+                ,data = checkStatus.data//获取选中的数据
+                ,deList=[];
+            data.forEach(function (n,i) {
+                deList.push(n.id)
+            });
+            switch(obj.event){
+                case 'add':
+                    layer.msg('添加');
+                    break;
+                case 'update':
+                    if(data.length === 0){
+                        layer.msg('请选择一行');
+                    } else if(data.length > 1){
+                        layer.msg('只能同时编辑一个');
+                    } else {
+                        var id =checkStatus.data[0].id;
+
+                        layer.open({
+                            type:1,
+                            title:'修改用户信息',
+                            btnAlign: 'c',
+                            area: ['400px', '340px'],
+                            content: $("#add-main"),
+                            btn:['保存','取消'],
+                            success: function (layero, index) {
+                                top.$('#name').val(checkStatus.data[0].testname);
+                            },
+                            yes:function(index,layero){
+                                var name =top.$('#name').val();
+                                var password =top.$("#password").val();
+                                console.log(name+"p"+password+"id"+id);
+                                $.ajax({
+                                    //几个参数需要注意一下
+                                    type: "POST",//方法类型
+                                    dataType: "json",//预期服务器返回的数据类型
+                                    url: "/test6" ,//url
+                                    data: {name:name,password:password,id:id},
+                                    success: function (result) {
+                                        console.log(result);//打印服务端返回的数据(调试用)
+                                        if (result.create != null) {
+                                            alert(result.create);
+
+                                        }else{
+                                            alert(result.create);
+                                        }
+                                    },
+                                    error : function() {
+                                        alert("异常！");
+                                    }
+                                });
+                                table.reload('idTest',{
+                                    url:'/test1',
+                                    where:{page:1,limit:10}  ,
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                })
+                                layer.close(index);
+                            },
+                            btn2:function (index) {
+                                layer.close(index);
+                            }
+                        })
+                    }
+                    break;
+                case 'delete':
+                    if(data.length === 0){
+                        layer.msg('请选择一行');
+                    } else {
+                        layer.alert('删除'+JSON.stringify(deList));
+                    }
+                    break;
+            }
+        });
+        var $ = layui.$, active = {
+            /*     getCheckData: function(){ //获取选中数据
+                     var checkStatus = table.checkStatus('idTest')
+                         ,data = checkStatus.data;
+                     layer.alert(JSON.stringify(data));
+                 }
+                 ,getCheckLength: function(){ //获取选中数目
+                     var checkStatus = table.checkStatus('idTest')
+                         ,data = checkStatus.data;
+                     layer.msg('选中了：'+ data.length + ' 个');
+                 }
+                 ,isAll: function(){ //验证是否全选
+                     var checkStatus = table.checkStatus('idTest');
+                     layer.msg(checkStatus.isAll ? '全选': '未全选')
+                 }
+                 ,*/reload:function () {
+                var demoReload = $('#demoReload');
+                table.reload('idTest',{
+                    url:'/found',
+                    where:{found:demoReload.val()}  ,
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                })
+
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+
+</body>
+</html>

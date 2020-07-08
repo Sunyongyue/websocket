@@ -1,0 +1,22 @@
+server:
+  port: 7566
+# netty配置
+netty:
+  # 端口号
+  port: 7567
+  # 最大线程数
+  maxThreads: 1024
+  # 数据包的最大长度
+  max_frame_length: 65535
+
+spring:
+  application:
+    name: netty_server1
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 10
+  thymeleaf:
+      prefix: classpath:/templates/
+      suffix: .html

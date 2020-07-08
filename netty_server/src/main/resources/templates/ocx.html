@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>普通IC卡表和远传金额IC卡表DLL调用Demo</title>
+		<style type="text/css">
+			html,
+			body,
+			#div1 {
+				width: 100%;
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+			}
+			
+			span {
+				display: block;
+			}
+		</style>
+		<link rel="stylesheet" href="layui/css/layui.css">
+		<script src="layui/layui.js"></script>
+		<script src="js/jquery-3.3.1.js"></script>
+		<!--字体图标-->
+		<link href="css/icomoon.css" rel="stylesheet" />
+		<!--动画-->
+		<link href="css/animate.css" rel="stylesheet" />
+		<!--骨架样式-->
+		<link href="css/common.css" rel="stylesheet" />
+		<!--皮肤（缇娜）-->
+		<link href="css/skin/tina.css" rel="stylesheet" />
+		<!--jquery，不可修改版本-->
+		<script src="lib/jquery-1.7.2.min.js"></script>
+		<!--全局动态修改-->
+		<script src="js/common.js"></script>
+		<!--核心组件-->
+		<script src="js/javaex.min.js"></script>
+		<!--表单验证-->
+		<script src="js/javaex-formVerify.js"></script>
+
+	</head>
+
+	<body>
+		<object id="TianHeOCX" width=0 height=0 classid="clsid:F6101BA3-2D51-4CF8-8B05-A6B88A858E8D"> </object>
+		<div id="div1">
+			<div style="float: left; width: 30%;height: 100%;" class="layui-bg-gray">
+				<h2 style="margin-left: 10px;margin-top: 30px; color: #E96900;">普通IC卡表和远传金额IC卡表DLL调用Demo</h2>
+				<div style="margin-top: 20px; margin-left: 25px;">端 口 号:<input type="text" style="margin-left: 5px; width: 300px; border-radius: 5px; " id="port" placeholder="请输入端口号" value="0" /></div>
+				<div style="margin-top: 10px; margin-left: 25px;">波 特 率:<input type="text" style="margin-left: 5px; width: 300px; border-radius: 5px;" id="baud" placeholder="请输入波特率" value="9600" /></div>
+				<label class="layui-form-label" style="margin-left: -5px; margin-top: 5px; width: 100px; ">使能蜂鸣:</label>
+				<div class="layui-input-block" id="beep" style="margin: 15px 100px;">
+					<input type="radio" name="b" value="1" checked> 启用
+					<input type="radio" name="b" value="0">禁用
+				</div>
+				<div style="margin-left: 22px; margin-top: -20px;"> 蜂鸣时间:<input type="text" style="margin-left: 5px; width: 300px; border-radius: 5px;" id="time" placeholder="请输入蜂鸣时间" value="25" /></div>
+				<label class="layui-form-label" style="margin: 3px -5px; width: 100px">使能弹窗:</label>
+				<div class="layui-input-block" id="popup" style="margin: 10px 100px;">
+					<input type="radio" name="p" value="1" checked>启用
+					<input type="radio" name="p" value="0">禁用
+				</div>
+				<div style="margin-left: 25px;margin-top: -10px; ">IC卡卡号:<input type="text" style="margin-left: 5px; width: 300px; border-radius: 5px;" id="cardNum" placeholder="请输入IC卡卡号" value="00001234" /></div>
+				<div style="margin-left: 25px; margin-top: 10px; ">IC卡密码:<input style="margin-left: 5px; width: 300px; border-radius: 5px;" id="cardPwd" placeholder="请输入IC卡密码" value="a539" /></div>
+				<div style=" margin-left: 20px; margin-top: 10px;">购/退气量:<input style="margin-left: 5px; width: 300px; border-radius: 5px;" id="buyVolume0" placeholder="请输入购/退气量" value="16" /></div>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHICOpenUserCard()">IC卡表开户卡</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHICSupUserCard()">IC卡表补用户卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHICSaleGas();">IC卡表售气/补气</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHICBackGas();">IC卡表退气</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHXLLMoveCard();">小流量转移卡</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHDLLMoveCard();">大流量转移卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHSYLJMoveCard()">剩余累计转移卡</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 150px;" onclick="WebTHReleaseCard()">解除卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-danger" style="width: 150px;" onclick="WebTHJudgeCompany()">厂商判断</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-danger" style="width: 150px;" onclick="WebTHReadCard()">读卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-danger" style="width: 150px;" onclick="WebTHClearCard()">恢复空白卡</button></li>
+				</ul>
+			</div>
+			<div style="float: left; width: 30%;height: 100%; " class="layui-bg-gray ">
+				<div style="margin-top: 30px; margin-left: 5px; border: 3px dashed  #000000;  width: 450px; height: 640px;">
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div style="display: inline;font-size: 20px;">名称</div>
+						<div style="display: inline;font-size: 20px; margin-left: 80px;">数值</div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div id="result" style="display: inline;font-size: 14px;"></div>
+						<div id="result1" style="display: inline;font-size: 14px; margin-left: 50px;"></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div id="cardtype" style="display: inline;font-size: 14px; margin-left: 15px;"></div>
+						<div id="cardtype1" style="display: inline;font-size: 14px; margin-left: 50px;"></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div id="cardnum" style="display: inline;font-size: 14px; margin-left: 27px;"></div>
+						<div id="cardnum1" style="display: inline;font-size: 14px; margin-left: 50px;"></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div id="cardpwd" style="display: inline;font-size: 14px; margin-left: 15px;"></div>
+						<div id="cardpwd1" style="display: inline;font-size: 14px; margin-left: 50px;"></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+						<div id="cardmoney" style="display: inline;font-size: 14px;"></div>
+						<div id="cardmoney1" style="display: inline;font-size: 14px; margin-left: 50px;"></div>
+					</ul>
+				</div>
+			</div>
+			<div style="float: left; width: 40%;height: 100%; " class="layui-bg-gray ">
+
+				<fieldset style="margin-left: 25px;margin-top: 30px;width: 560px; height: 260px;">
+					<legend>气价信息</legend>
+					<label class="layui-form-label" style="margin-left: -5px; margin-top: 5px; width: 90px; ">计量方式:</label>
+					<div class="layui-input-block" id="ovlType" style="margin-left: -10px;margin-top: 16px;">
+						<input type="radio" name="o" value="0"> 单一
+						<input type="radio" name="o" value="1" checked>阶梯
+					</div>
+					<div style="margin-top:-8px; margin-left: 10px;">调 价次 数:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setPriceNum" placeholder="请输入调价次数" value="1" /></div>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">阶梯单价1:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpPrice1" placeholder="请输入阶梯单价1" value="2.63" /></div>
+						<div style="margin-top:-8px;  display: inline;">阶梯上限1:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpVolume1" placeholder="请输入阶梯上限1" value="300" /></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">阶梯单价2:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpPrice2" placeholder="请输入阶梯单价2" value="3.16" /></div>
+						<div style="margin-top:-8px;  display: inline;">阶梯上限2:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpVolume2" placeholder="请输入阶梯上限2" value="600" /></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">阶梯单价3:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpPrice3" placeholder="请输入阶梯单价3" value="3.95" /></div>
+						<div style="margin-top:-8px;  display: inline;">阶梯上限3:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="setpVolume3" placeholder="请输入阶梯上限3" value="1677215" /></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">生 效日 期:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="efftime" placeholder="请输入生效日期" value="20190101" /></div>
+						<div style="margin-top:-8px;  display: inline;">生 效时 间:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="" placeholder="请输入生效时间" value="000000" /></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">结 算日 期:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="payDate" placeholder="请输入结算日期" value="25" /></div>
+						<div style="margin-top:-8px;  display: inline;">结 算周 期:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="payCycle" placeholder="请输入结算周期" value="0" /></div>
+					</ul>
+				</fieldset>
+				<fieldset style="margin-left: 25px;margin-top: 15px;width: 560px; height: 140px;">
+					<legend>充值信息</legend>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px; margin-left: -300px; display: inline;">IC卡卡号:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="cardNum1" placeholder="请输入卡号" value="00000001" /></div>
+						<label class="layui-form-label" style="margin-left: 210px; margin-top: -10px; width: 90px; display: inline; ">计费方式:</label>
+						<div class="layui-input-block" id="payType" style="margin-left: 76px;margin-top: 16px; display: inline;">
+							<input type="radio" name="pay" value="0"> 气量
+							<input type="radio" name="pay" value="1" checked>金额
+						</div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">公 司 号 :<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="companyNum" placeholder="请输入公司号" value="17" /></div>
+						<div style="margin-top:-8px;  display: inline;">本次购入:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="buyVolume1" placeholder="请输入本次购入" value="5.00" /></div>
+					</ul>
+					<ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+						<div style="margin-top:-8px;  display: inline;">充 值 数 :<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="reChargeNum" placeholder="请输入充值数" value="1" /></div>
+						<div style="margin-top:-8px;  display: inline;">累计总购:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="totalVolume" placeholder="请输入累计总购" value="20.00" /></div>
+					</ul>
+				</fieldset>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 35px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 260px;" onclick="WebTHWICKBUserCard0()">远传IC卡表开户卡</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 260px;" onclick="WebTHWICKBUserCard1()">远传IC卡表补开户卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 260px;" onclick="WebTHWICKBUserCard2();">远传IC卡表补用户卡</button></li>
+				</ul>
+				<ul class="equal-2 clear" style="margin-left: 25px;margin-top: 15px;">
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 260px;" onclick="WebTHWICSaleGas()">远传IC卡表售/补气</button></li>
+					<li><button type="button" class="layui-btn layui-btn-lg layui-btn-normal" style="width: 260px;" onclick="WebTHWICBakGas()">远传IC卡表退气</button></li>
+				</ul>
+
+			</div>
+
+		</div>
+		<script language='javascript'>
+			function WebTHJudgeCompany() {
+				console.log("进入----------------")
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THJudgeCompany_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("");
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 0) {
+					$("#result").html("执行结果：");
+					$("#result1").html("非天和用户卡");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("");
+					alert("执行结果：非天和用户卡");
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("天和用户卡");
+					$("#cardnum").html("卡号：");
+					$("#cardnum1").html(thocx.cardNum);
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("");
+					alert("执行结果：天和用户卡");
+					alert("卡号：" + thocx.cardNum);
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHICOpenUserCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.buyVolume = $("#buyVolume0").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THICOpenUserCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes.substring(40,60));
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+
+			}
+
+			function WebTHICSupUserCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.buyVolume = $("#buyVolume0").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THICSupUserCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHICSaleGas() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.buyVolume = $("#buyVolume0").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THICSaleGas_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHICBackGas() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.buyVolume = $("#buyVolume0").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THICBackGas_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHXLLMoveCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THXLLMoveCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHDLLMoveCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THDLLMoveCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败"+"\n"+thocx.errRes);
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败");
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHSYLJMoveCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THSYLJMoveCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHReleaseCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THReleaseCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHReadCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.buyAmount = 0;
+				/*thocx.buyVolume = $("#buyVolume0").val();*/
+				thocx.cardType = 255;
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THReadCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					alert("执行结果：函数执行成功");
+					switch(thocx.cardType) {
+						case 0:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("空白卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 1:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表开户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							alert(thocx.buyVolume);
+							break;
+						case 2:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表开户卡(已插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							break;
+						case 3:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表用户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							break;
+						case 4:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表用户卡(已插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							break;
+						case 5:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表补用户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							break;
+						case 6:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("普通卡表补用户卡(已插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上气量：");
+							$("#cardmoney1").html(thocx.buyVolume);
+							break;
+						case 7:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("小流量转出卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 8:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("小流量转入");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 9:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("小流量失效转移卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 10:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("大流量转出卡/金额表转出卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 11:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("大流量转入卡/金额表转入卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 12:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("大流量失效卡/金额表失效卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 13:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("剩余累计转出卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 14:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("剩余累计转入卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 15:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("剩余累计失效转移卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 16:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("解除卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 17:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("清零卡");
+							$("#cardnum").html("");
+							$("#cardnum1").html("");
+							$("#cardpwd").html("");
+							$("#cardpwd1").html("");
+							$("#cardmoney").html("");
+							$("#cardmoney1").html("");
+							break;
+						case 50:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表开户卡/补开户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+						case 51:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表开户卡/补开户卡(已插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+						case 52:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表用户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+						case 53:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表用户卡(已插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+						case 54:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表补用户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+						case 55:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("远传金额表补用户卡(未插表)");
+							$("#cardnum").html("卡号：");
+							$("#cardnum1").html(thocx.cardNum);
+							$("#cardpwd").html("卡密码：");
+							$("#cardpwd1").html(thocx.cardPwd);
+							$("#cardmoney").html("卡上金额：");
+							$("#cardmoney1").html(thocx.buyAmount);
+							break;
+						default:
+							$("#cardtype").html("卡类型：");
+							$("#cardtype1").html("未知的卡类型");
+							break;
+					}
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHClearCard() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardPwd = $("#cardPwd").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THClearCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHWICKBUserCard0() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum1").val();
+				thocx.companyNum = $("#companyNum").val();
+				thocx.buyAmount = $("#buyVolume1").val();
+				thocx.totalAmount = $("#totalVolume").val();
+				thocx.payType = $('#payType input[name="pay"]:checked ').val();
+				thocx.reChargeNum = $("#reChargeNum").val();
+				thocx.volType = $('#ovlType input[name="o"]:checked ').val();
+				thocx.setPriceNum = $("#setPriceNum").val();
+				thocx.stepPrice1 = $("#setpPrice1").val();
+				var x=$("#setpPrice1").val();
+				console.log($("#setpPrice1").val()+"input");
+				console.log(thocx.stepPrice1+"thocx.stepPrice1"+x);
+				thocx.stepVolume1 = $("#setpVolume1").val();
+				thocx.stepPrice2 = $("#setpPrice2").val();
+				thocx.stepVolume2 = $("#setpVolume2").val();
+				thocx.stepPrice3 = $("#setpPrice3").val();
+				thocx.stepVolume3 = $("#setpVolume3").val();
+				thocx.effTime = $("#efftime").val();
+				thocx.payDate = $("#payDate").val();
+				thocx.payCycle = $("#payCycle").val();
+				thocx.cardType = 0;
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THWICKBUserCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHWICKBUserCard1() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum1").val();
+				thocx.companyNum = $("#companyNum").val();
+				thocx.buyVolume = $("#buyVolume1").val();
+				thocx.totalVolume = $("#totalVolume").val();
+				thocx.payType = $('#payType input[name="pay"]:checked ').val();
+				thocx.reChargeNum = $("#reChargeNum").val();
+				thocx.volType = $('#ovlType input[name="o"]:checked ').val();
+				thocx.setPriceNum = $("#setPriceNum").val();
+				thocx.stepPrice1 = $("#setpPrice1").val();
+				thocx.stepVolume1 = $("#setpVolume1").val();
+				thocx.stepPrice2 = $("#setpPrice2").val();
+				thocx.stepVolume2 = $("#setpVolume2").val();
+				thocx.stepPrice3 = $("#setpPrice3").val();
+				thocx.stepVolume3 = $("#setpVolume3").val();
+				thocx.effTime = $("#efftime").val();
+				thocx.payDate = $("#payDate").val();
+				thocx.payCycle = $("#payCycle").val();
+				thocx.cardType = 1;
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THWICKBUserCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHWICKBUserCard2() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum1").val();
+				thocx.companyNum = $("#companyNum").val();
+				thocx.buyVolume = $("#buyVolume1").val();
+				thocx.totalVolume = $("#totalVolume").val();
+				thocx.payType = $('#payType input[name="pay"]:checked ').val();
+				thocx.reChargeNum = $("#reChargeNum").val();
+				thocx.volType = $('#ovlType input[name="o"]:checked ').val();
+				thocx.setPriceNum = $("#setPriceNum").val();
+				thocx.stepPrice1 = $("#setpPrice1").val();
+				thocx.stepVolume1 = $("#setpVolume1").val();
+				thocx.stepPrice2 = $("#setpPrice2").val();
+				thocx.stepVolume2 = $("#setpVolume2").val();
+				thocx.stepPrice3 = $("#setpPrice3").val();
+				thocx.stepVolume3 = $("#setpVolume3").val()
+				thocx.effTime = $("#efftime").val();
+				thocx.payDate = $("#payDate").val();
+				thocx.payCycle = $("#payCycle").val();
+				thocx.cardType = 2;
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THWICKBUserCard_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHWICSaleGas() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum1").val();
+				thocx.companyNum = $("#companyNum").val();
+				thocx.buyAmount = $("#buyVolume1").val();
+				thocx.totalAmount = $("#totalVolume").val();
+				thocx.payType = $('#payType input[name="pay"]:checked ').val();
+				thocx.reChargeNum = $("#reChargeNum").val();
+				thocx.volType = $('#ovlType input[name="o"]:checked ').val();
+				thocx.setPriceNum = $("#setPriceNum").val();
+				thocx.stepPrice1 = $("#setpPrice1").val();
+				thocx.stepVolume1 = $("#setpVolume1").val();
+				thocx.stepPrice2 = $("#setpPrice2").val();
+				thocx.stepVolume2 = $("#setpVolume2").val();
+				thocx.stepPrice3 = $("#setpPrice3").val();
+				thocx.stepVolume3 = $("#setpVolume3").val()
+				thocx.effTime = $("#efftime").val();
+				thocx.payDate = $("#payDate").val();
+				thocx.payCycle = $("#payCycle").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THWICSaleGas_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+
+			function WebTHWICBackGas() {
+				var thocx = document.getElementById("TianHeOCX");
+				thocx.port = $("#port").val();
+				thocx.baud = $("#baud").val();
+				thocx.beep = $('#beep input[name="b"]:checked ').val();
+				thocx.time = $("#time").val();
+				thocx.cardNum = $("#cardNum1").val();
+				thocx.companyNum = $("#companyNum").val();
+				thocx.buyVolume = $("#buyVolume1").val();
+				thocx.totalVolume = $("#totalVolume").val();
+				thocx.payType = $('#payType input[name="pay"]:checked ').val();
+				thocx.reChargeNum = $("#reChargeNum").val();
+				thocx.volType = $('#ovlType input[name="o"]:checked ').val();
+				thocx.setPriceNum = $("#setPriceNum").val();
+				thocx.stepPrice1 = $("#setpPrice1").val();
+				thocx.stepVolume1 = $("#setpVolume1").val();
+				thocx.stepPrice2 = $("#setpPrice2").val();
+				thocx.stepVolume2 = $("#setpVolume2").val();
+				thocx.stepPrice3 = $("#setpPrice3").val();
+				thocx.stepVolume3 = $("#setpVolume3").val()
+				thocx.effTime = $("#efftime").val();
+				thocx.payDate = $("#payDate").val();
+				thocx.payCycle = $("#payCycle").val();
+				thocx.popup = $('#popup input[name="p"]:checked ').val();
+				thocx.errRes = "";
+				var result = thocx.THWICBackGas_OCX();
+				if(result == -1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行失败");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行失败"+"\n"+thocx.errRes);
+				} else if(result == 1) {
+					$("#result").html("执行结果：");
+					$("#result1").html("函数执行成功");
+					$("#cardtype").html("");
+					$("#cardtype1").html("");
+					$("#cardnum").html("");
+					$("#cardnum1").html("");
+					$("#cardpwd").html("");
+					$("#cardpwd1").html("");
+					$("#cardmoney").html("");
+					$("#cardmoney1").html("")
+					alert("执行结果：函数执行成功");
+				} else {
+					alert("I don't know")
+				}
+			}
+		</script>
+	</body>
+
+</html>

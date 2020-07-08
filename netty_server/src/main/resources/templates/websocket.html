@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}"  media="all"/>
+    <title>天和电信IOT平台（新奥）</title>
+</head>
+<style>
+    body,html{
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
+</style>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script th:src="@{/layui/layui.all.js}" charset="utf-8"></script>
+<script>
+    var socket;
+    function openSocket() {
+        if(typeof(WebSocket) == "undefined") {
+            console.log("您的浏览器不支持WebSocket");
+        }else{
+            console.log("您的浏览器支持WebSocket");
+            //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+            //等同于socket = new WebSocket("ws://localhost:8888/xxxx/im/25");
+            //var socketUrl="${request.contextPath}/im/"+$("#userId").val();
+            var socketUrl="http://39.98.86.240:7566/imserver/"+$("#deviceId").val();
+            socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+            console.log(socketUrl);
+            if(socket!=null){
+                socket.close();
+                socket=null;
+            }
+            socket = new WebSocket(socketUrl);
+            //打开事件
+            socket.onopen = function() {
+                console.log("websocket已打开");
+                var ta = document.getElementById('responseText');
+                ta.value += "websocket已打开连接"+"\r\n";
+            };
+            //获得消息事件
+            socket.onmessage = function(msg) {
+                var ta = document.getElementById('responseText');
+                ta.value += msg.data+"\r\n";
+            };
+            //关闭事件
+            socket.onclose = function() {
+
+                var ta = document.getElementById('responseText');
+                ta.value = "Netty-WebSocket服务器。。。。。。关闭 \r\n";
+            };
+            //发生了错误事件
+            socket.onerror = function() {
+                var ta = document.getElementById('responseText');
+                ta.value = "Netty-WebSocket服务器。。。。。。发生错误 \r\n";
+            }
+        }
+    }
+    function sendMessage(info) {
+        if(typeof(WebSocket) == "undefined") {
+            console.log("您的浏览器不支持WebSocket");
+        }else {
+            console.log("您的浏览器支持WebSocket");
+            var deviceId=$("#deviceId").val();
+            var deviceImei=$("#deviceImei").val();
+            if (deviceImei==""){
+                alert("设备Imei不能为空")
+            }else{
+                $.ajax({
+                    //几个参数需要注意一下
+                    type: "POST",//方法类型
+                    dataType: "json",//预期服务器返回的数据类型
+                    url: "/creat" ,//url
+                    data: {deviceId:deviceId,deviceImsi:deviceImei,flag:info},
+                    success: function (result) {
+                        console.log(result);//打印服务端返回的数据(调试用)
+
+                        var k =result.success;
+                        console.log(k);//打印服务端返回的数据(调试用)
+                        if (result.success >0) {
+                            layer.msg(result.message, {
+                                btnAlign: 'c',
+                                time: 3000, //20s后自动关闭
+                                btn: ['确定']
+                            });
+                        }else{
+                            layer.msg(result.message, {
+                                btnAlign: 'c',
+                                time: 3000, //20s后自动关闭
+                                btn: ['确定']
+                            });
+                        }
+                    },
+                    error : function() {
+                        alert("异常！");
+                    }
+                });
+                var ta = document.getElementById('responseText');
+                ta.value += '{"设备ID":"'+$("#deviceId").val()+'","设备IMEI":"'+$("#deviceImei").val()+'"}'+info+"\r\n";
+            }
+
+        }
+    }
+    //阀控
+    function valveControl(){
+        var deviceType=$("#deviceType").val();
+        var key=$("#key").val();
+        var version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let deviceImei=$("#deviceImei").val();
+        let flag=$("#valveControl").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/valveControl" ,//url
+            data: {deviceId:deviceId,deviceImsi:deviceImei,flag:flag,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //推送终端消息
+    function pushTerminalMessage(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let moneyHave=$("#moneyHave").val();
+        let moneyDisplay=$("#moneyDisplay").val();
+        let currentUnitPrice=$("#currentUnitPrice").val();
+        let overdrawDisplay=$("#overdrawDisplay").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/pushTerminalMessage" ,//url
+            data: {deviceId:deviceId,money:moneyHave,unitPrice:currentUnitPrice,moneyDisplay:moneyDisplay,overdrawDisplay:overdrawDisplay,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //设置功能参数
+    function setParameters(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let highTemAlarm=$("#highTemAlarm").val();
+        let lcdDisplayLong=$("#lcdDisplayLong").val();
+        let tiltAlarm=$("#tiltAlarm").val();
+        let leakageAlarm=$("#leakageAlarm").val();
+        let abnormalValve=$("#abnormalValve").val();
+        let fourEx=$("#fourEx").val();
+        let openAndCloseValve=$("#openAndCloseValve").val();
+        let hourSave=$("#hourSave").val();
+        let resetReport=$("#resetReport").val();
+        let onlineLong=$("#onlineLong").val();
+        let outFactory=$("#outFactory").val();
+        let virtualBilling=$("#virtualBilling").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/setParameters" ,//url
+            data: {deviceId:deviceId,highTemAlarm:highTemAlarm,lcdDisplayLong:lcdDisplayLong,tiltAlarm:tiltAlarm,leakageAlarm:leakageAlarm,abnormalValve:abnormalValve,fourEx:fourEx,openAndCloseValve:openAndCloseValve,hourSave:hourSave,resetReport:resetReport,onlineLong:onlineLong,outFactory:outFactory,virtualBilling:virtualBilling,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //读功能参数
+    function readParams(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readParams" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //reportingCycle设置上报周期
+    function reportingCycle(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let reportMode=$("#reportMode").val();
+        let regularReportTimes=$("#regularReportTimes").val();
+        let firstReportTime=$("#firstReportTime").val();
+        let intervalReportTime=$("#intervalReportTime").val();
+        let timeOne=$("#timeOne").val();
+        let timeTwo=$("#timeTwo").val();
+        let timeThree=$("#timeThree").val();
+        let timeFour=$("#timeFour").val();
+        let timeFive=$("#timeFive").val();
+        let timeSix=$("#timeSix").val();
+        let timeSeven=$("#timeSeven").val();
+        let timeEight=$("#timeEight").val();
+        let timeNine=$("#timeNine").val();
+        let timeTen=$("#timeTen").val();
+        let timeEleven=$("#timeEleven").val();
+        let timeTwelve=$("#timeTwelve").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/reportingCycleSet" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,reportMode:reportMode,regularReportTimes:regularReportTimes,firstReportTime:firstReportTime,
+                intervalReportTime:intervalReportTime,timeOne:timeOne,timeTwo:timeTwo,timeThree:timeThree,timeFour:timeFour,timeFive:timeFive,timeSix:timeSix,
+            timeSeven:timeSeven,timeEight:timeEight,timeNine:timeNine,timeTen:timeTen,timeEleven:timeEleven,timeTwelve:timeTwelve},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //reportingCycleRead读取上报周期
+    function reportingCycleRead(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/reportingCycleRead" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //读终端编号
+    function readTerminalNumber(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readTerminalNumber" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //读终端流量计参数
+    function flowmeterParamsRead(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let flowmeterLocationNumber=$("#flowmeterLocationNumber").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/flowmeterParamsRead" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,flowmeterLocationNumber:flowmeterLocationNumber},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //setRetransmissionInterva设置重发间隔
+    function setRetransmissionInterva(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let rewireTimes=$("#rewireTimes").val();
+        let rewireInterval=$("#rewireInterval").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/setRetransmissionInterva" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,rewireTimes:rewireTimes,rewireInterval:rewireInterval},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readRetransmissionInterva设置重发间隔
+    function readRetransmissionInterva(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readRetransmissionInterva" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readHourRecord小时历史记录
+    function readHourRecord(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let flowerNumHour=$("#flowerNumHour").val();
+        let recordHour=$("#recordHour").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readHourRecord" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,recordHour:recordHour,flowerNumHour:flowerNumHour},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readDayRecord天历史记录
+    function readDayRecord(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let flowerNumDay=$("#flowerNumDay").val();
+        let recordDay=$("#recordDay").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readDayRecord" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,recordDay:recordDay,flowerNumDay:flowerNumDay},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readMonthRecord月历史记录
+    function readMonthRecord(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let flowerNumMonth=$("#flowerNumMonth").val();
+        let recordMonth=$("#recordMonth").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readMonthRecord" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,flowerNumMonth:flowerNumMonth,recordMonth:recordMonth},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //clearEx清除异常指令
+    function clearEx(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let balance=$("#balance").val();
+        let valveEx=$("#valveEx").val();
+        let overdrawStatus=$("#overdrawStatus").val();
+        let saveEx=$("#saveEx").val();
+        let meterLowPre=$("#meterLowPre").val();
+        let leakageEx=$("#leakageEx").val();
+        let farAwayLowPre=$("#farAwayLowPre").val();
+        let tiltEx=$("#tiltEx").val();
+        let standbyVoltageEx=$("#standbyVoltageEx").val();
+        let highTemEx=$("#highTemEx").val();
+        let valveControlVolLow=$("#valveControlVolLow").val();
+        let noReportDays=$("#noReportDays").val();
+        let farAwayExternalEle=$("#farAwayExternalEle").val();
+        let valveCloseOne=$("#valveCloseOne").val();
+        let fourTelEx=$("#fourTelEx").val();
+        let openLidEx=$("#openLidEx").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/clearEx" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,balance:balance,valveEx:valveEx,overdrawStatus:overdrawStatus,saveEx:saveEx,meterLowPre:meterLowPre,
+                leakageEx:leakageEx,farAwayLowPre:farAwayLowPre,tiltEx:tiltEx,standbyVoltageEx:standbyVoltageEx,highTemEx:highTemEx,valveControlVolLow:valveControlVolLow,
+                noReportDays:noReportDays,farAwayExternalEle:farAwayExternalEle,valveCloseOne:valveCloseOne,fourTelEx:fourTelEx,openLidEx:openLidEx},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readDeviceStatus 读终端状态46H
+    function readDeviceStatus(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readDeviceStatus" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //systemClock 读取系统时钟06H
+    function systemClock(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/systemClock" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //systemClock 读IC卡ICCID号
+    function iccIDNum(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/iccIDNum" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //setNoReportCloseDays设置无上报关阀天数2B
+    function setNoReportCloseDays(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let noReportCloseValveDays=$("#noReportCloseValveDays").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/setNoReportCloseDays" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,noReportCloseValveDays:noReportCloseValveDays},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readNoReportCloseDays读无上报关阀天数11H
+    function readNoReportCloseDays(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readNoReportCloseDays" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //setNoUseGasCloseDays设置无用气关阀天数14H
+    function setNoUseGasCloseDays(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let noUseGasCloseValveDays=$("#noUseGasCloseValveDays").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/setNoUseGasCloseDays" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,noUseGasCloseValveDays:noUseGasCloseValveDays},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readNoUseGasCloseDays读无用气关阀天数15H
+    function readNoUseGasCloseDays(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readNoUseGasCloseDays" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //setCloseOneTimes设置关阀一次累计气量值(42H)
+    function setCloseOneTimes(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let closeValveType=$("#closeValveType").val();
+        let totalGas=$("#totalGas").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/setCloseOneTimes" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,totalGas:totalGas,closeValveType:closeValveType},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //redCloseOneTimes
+    function redCloseOneTimes(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/redCloseOneTimes" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readAllowAlarm
+    function readAllowAlarm(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readAllowAlarm" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //allowAlarmLimit
+    function allowAlarmLimit(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let meterType=$("#meterType").val();
+        let valveOne=$("#valveOne").val();
+        let surplusOne=$("#surplusOne").val();
+        let surplusTwo=$("#surplusTwo").val();
+        let valveTwo=$("#valveTwo").val();
+        let surplusThree=$("#surplusThree").val();
+        let valveThree=$("#valveThree").val();
+        let surplusFour=$("#surplusFour").val();
+        let valveFour=$("#valveFour").val();
+        let surplusFive=$("#surplusFive").val();
+        let valveFive=$("#valveFive").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/allowAlarmLimit" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,meterType:meterType,valveOne:valveOne,surplusOne:surplusOne,
+                surplusTwo:surplusTwo,valveTwo:valveTwo,surplusThree:surplusThree,valveThree:valveThree,surplusFour:surplusFour,valveFour:valveFour,
+                surplusFive:surplusFive,valveFive:valveFive},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //readReportInfoCommand
+    function readReportInfoCommand(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        let flowerNum=$("#flowerNum").val();
+
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/readReportInfoCommand" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version,flowerNum:flowerNum},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    //keyIssue
+    function keyIssue(){
+        let deviceType=$("#deviceType").val();
+        let key=$("#key").val();
+        let version=$("#version").val();
+        let deviceId=$("#deviceId").val();
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/keyIssue" ,//url
+            data: {deviceId:deviceId,deviceType:deviceType,key:key,version:version},
+            success: function (result) {
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+    }
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#recordDay' //指定元素
+            ,format: 'yyyyMMdd'
+        });
+        laydate.render({
+            elem: '#recordMonth' //指定元素
+            ,type: 'month'
+            ,format: 'yyyyMM'
+        });
+
+    });
+</script>
+<body>
+<!--<p>【userId】：<div><input id="userId" name="userId" type="text" value="10"></div>
+<p>【toUserId】：<div><input id="toUserId" name="toUserId" type="text" value="20"></div>
+<p>【toUserId】：<div><input id="contentText" name="contentText" type="text" value="hello websocket"></div>
+<p>【操作】：<div><a onclick="openSocket()">开启socket</a></div>
+<p>【操作】：<div><a onclick="sendMessage()">发送消息</a></div>-->
+<div style="float: left; width: 50%;height: 95%;">
+    <div style="width: 100%;height: 100%;overflow-y: auto">
+        <fieldset style="margin-left: 15px;width:93%; height: 2450px;">
+            <legend>指令下发及配置</legend>
+           <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                <div style="margin-top:-8px;  display: inline;">设备ID:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="deviceId" placeholder="请输入设备ID" /></div>
+                <div style="margin-top:-8px;  display: inline;">设备IMEI:<input type="text" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="deviceImei" placeholder="请输入设备IMEI" /></div>
+               <button type="button" class="layui-btn  layui-btn-xs" onclick="sendMessage('注册')">设备注册</button>
+               <button type="button" class="layui-btn layui-btn-danger layui-btn-xs" onclick="sendMessage('注销')">设备注销</button>
+               <button type="button" class="layui-btn layui-btn-normal layui-btn-xs" onclick="openSocket()">打开连接</button>
+            </ul>
+            <ul style="margin-top: 10px;margin-left: 10px;">
+                <div style="margin-top:-8px;  display: inline;">设备类型:<select id="deviceType" style="margin-left: 10px;width: 150px">
+                    <option value="14">分体式流量远传控制终端</option>
+                    <!--<option value="10">一体式流量远传终端</option>
+                    <option value="11">一体式流量远传控制终端</option>
+                    <option value="12">一体式流量远传卡控终端</option>
+                    <option value="13">分体式流量远传终端</option>
+                    <option value="15">分体式流量远传卡控终端</option>-->
+                </select>
+                </div>
+                <div style="margin-top:-8px;  display: inline;">密匙:<select id="key" style="margin-left: 10px;width: 50px">
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                </select>
+                </div>
+                <div style="margin-top:-8px;  display: inline;">版本号:<input type="text" value="01" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="version" placeholder="请输入版本号" /></div>
+
+            </ul>
+            <fieldset style="margin-left: 15px;width:650px; height:40px;">
+                <legend>阀控</legend>
+                <div style="margin-top:-8px;  display: inline;">阀控类别:<select id="valveControl" style="margin-left: 30px">
+                    <option value="11">11H-开阀</option>
+                    <option value="22">22H-警告关阀</option>
+                    <option value="33">33H-强制关阀</option>
+                </select></div>
+                <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="valveControl()">阀控07H</button>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>推送终端消息</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">剩余金额:<input type="text" value="1200.40" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="moneyHave" placeholder="请输入剩余金额" /></div>
+                    <div style="margin-top:-8px;  display: inline;">余额显示:<select id="moneyDisplay"  style="margin-left: 30px;width: 150px">
+                        <option value="1">有余额不足时显示</option>
+                        <option value="0">无余额不足时显示</option>
+                    </select></div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">当前单价:<input type="text" value="2.622" style="margin-left: 10px; width: 150px; border-radius: 5px; " id="currentUnitPrice" placeholder="请输入当前单价" /></div>
+                    <div style="margin-top:-8px;  display: inline;">透支显示:<select id="overdrawDisplay" style="margin-left: 30px;width: 150px">
+                        <option value="1">有透支显示</option>
+                        <option value="0">无透支显示</option>
+                        </select>
+                    </div>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="pushTerminalMessage()">推送终端消息03H</button>
+                </ul>
+                </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:240px;">
+                <legend>功能参数</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">高温报警:
+                        <select id="highTemAlarm" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 13%; display: inline;">液晶长显:
+                        <select id="lcdDisplayLong" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">倾斜报警:
+                        <select id="tiltAlarm" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 13%; display: inline;">泄漏检测:
+                        <select id="leakageAlarm" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">阀门异常:
+                        <select id="abnormalValve" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 5%;  display: inline;">485通讯异常关阀:
+                        <select id="fourEx" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">开盖关阀:
+                        <select id="openAndCloseValve" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px;  display: inline;">按小时存储流量计信息:
+                        <select id="hourSave" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">上电上传:
+                        <select id="resetReport" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 8%; display: inline;">长期在线模式:
+                        <select id="onlineLong" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">出厂模式:
+                        <select id="outFactory" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 13%; display: inline;">虚拟计费:
+                        <select id="virtualBilling" style="margin-left: 10px;width: 150px">
+                            <option value="0">不启用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 28%" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setParameters()">设置功能参数47H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readParams()">读取功能参数48H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:160px;">
+                <legend>上报周期</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 5%; display: inline;">上报方式:
+                        <select id="reportMode" style="margin-left: 10px;width: 120px">
+                            <option value="01">01H-定时上报</option>
+                            <option value="02">02H-间隔上报</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 13%; display: inline;">定时上报次数:
+                        <select id="regularReportTimes" style="margin-left: 10px;width: 120px">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">间隔上报的首次上报时间:
+                        <input type="text" style="margin-left: 10px; width: 120px;" id="firstReportTime" value="0119" />
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">时间1-6:
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeOne" value="0000"  />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeTwo" value="0200"  />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeThree" value="0400"  />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeFour" value="0600"  />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeFive" value="0800"  />
+                        <input type="text" style="margin-left: 3px; width: 30px; "   id="timeSix" value="1000" />
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">间隔上报的间隔时间（分）:
+                        <input type="text" style="margin-left: 10px; width: 120px; " id="intervalReportTime" value="1440"  />
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">时间7-12:
+                        <input type="text" style="margin-left: 3px; width: 30px; "  id="timeSeven" value="1200" />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeEight" value="1400" />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeNine" value="1600" />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeTen" value="1800" />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeEleven" value="2000"  />
+                        <input type="text" style="margin-left: 3px; width: 30px;  "  id="timeTwelve"  value="2200" />
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                <button type="button" style="margin-left: 28%" class="layui-btn layui-btn-normal layui-btn-xs" onclick="reportingCycle()">设置上报周期49H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="reportingCycleRead()">读取上报周期4AH</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width: 650px;height: 60px;">
+                <legend>终端编号</legend>
+                <button type="button" style="margin-left: 35%" class="layui-btn layui-btn-normal layui-btn-lg" onclick="readTerminalNumber()">读终端编号4DH</button>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width: 650px;height: 60px;">
+                <legend>流量计参数</legend>
+                <div style="margin-top:-8px;  display: inline;">流量计位置号:<select  style="margin-left: 30px;width: 120px" id="flowmeterLocationNumber">
+                    <option value="01">01-H</option>
+                    <option value="02">02-H</option>
+                    <option value="03">03-H</option>
+                    <option value="04">04-H</option>
+                </select></div>
+                <button type="button" style="margin-left: 10px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="">读终端流量计参数4FH</button>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>重发间隔</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 5%; display: inline;">重发次数:
+                        <select id="rewireTimes" style="margin-left: 10px;width: 120px">
+                            <option value="01">1</option>
+                            <option value="02">2</option>
+                            <option value="03">3</option>
+                            <option value="04">4</option>
+                            <option value="05">5</option>
+                            <option value="06">6</option>
+                            <option value="07">7</option>
+                            <option value="08">8</option>
+                            <option value="09">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 13%; display: inline;">重发间隔（分）:
+                        <input type="text" style="margin-left: 3px; width: 120px;" id="rewireInterval"  value="5"  />
+                    </div>
+                </ul>
+
+
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 28%" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setRetransmissionInterva()">设置重发间隔18H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readRetransmissionInterva()">读取重发间隔19H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>小时历史记录</legend>
+                <div style="margin-top:-8px; margin-left:5%; display: inline;">流量计编号:
+                    <input type="text" style="margin-left: 10px; width: 240px;" id="flowerNumHour"  value="TH00188190712346225G500L1568"  />
+                </div>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">历史记录时段:
+                        <select id="recordHour" style="margin-left: 10px;width: 240px">
+                            <option value="81">81_前日0-5时历史记录</option>
+                            <option value="82">82_前日6-11时历史记录</option>
+                            <option value="83">83_前日12-17时历史记录</option>
+                            <option value="84">84_前日18-23时历史记录</option>
+                            <option value="85">85_当日0-5时历史记录</option>
+                            <option value="86">86_当日6-11时历史记录</option>
+                            <option value="87">87_当日12-17时历史记录</option>
+                            <option value="88">88_当日18-23时历史记录</option>
+                        </select>
+                        <button type="button" style="margin-left: 10px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readHourRecord()">读小时历史记录3BH</button>
+                    </div>
+                </ul>
+
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>天历史记录</legend>
+                <div style="margin-top:-8px; margin-left:5%; display: inline;">流量计编号:
+                    <input type="text" style="margin-left: 10px; width: 240px;" id="flowerNumDay"  value="TH00188190712346225G500L1568"  />
+                </div>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 6%; display: inline;">记录日期:
+                        <input id="recordDay"  style="width: 240px;margin-left: 10px;" placeholder="请选择记录日期"/>
+                    </div>
+                    <button type="button" style="margin-left: 10px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readDayRecord()">读天历史记录3CH</button>
+
+                </ul>
+
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>月历史记录</legend>
+                <div style="margin-top:-8px; margin-left:5%; display: inline; ">流量计编号:
+                    <input type="text" style="margin-left: 10px; width: 240px;" id="flowerNumMonth"  value="TH00188190712346225G500L1568"  />
+                </div>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 6%; display: inline;">记录日期:
+                        <input id="recordMonth"  style="width: 240px;margin-left: 10px;" placeholder="请选择记录日期"/>
+                    </div>
+                    <button type="button" style="margin-left:10px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readMonthRecord()">读月历史记录3DH</button>
+
+                </ul>
+
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:300px;">
+                <legend>终端异常状态</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 9%;display: inline;">余额不足:
+                        <select id="balance" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 15%; display: inline;">阀门异常:
+                        <select id="valveEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 9%;display: inline;">透支状态:
+                        <select id="overdrawStatus" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px;margin-left: 15%; display: inline;">存储异常:
+                        <select id="saveEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">终端计量部分低压:
+                        <select id="meterLowPre" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 15%;  display: inline;">泄露异常:
+                        <select id="leakageEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  display: inline;">终端远传部分低压:
+                        <select id="farAwayLowPre" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 15%; display: inline;">倾斜报警:
+                        <select id="tiltEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 2%; display: inline;">时钟备电电压低:
+                        <select id="standbyVoltageEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 15%; display: inline;">高温报警:
+                        <select id="highTemEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 2%;display: inline;">阀控部分电压低:
+                        <select id="valveControlVolLow" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 6%; display: inline;">无上报关阀天数到:
+                        <select id="noReportDays" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 4%; display: inline;">远传部分外电:
+                        <select id="farAwayExternalEle" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">关阀一次累计气量值到:
+                        <select id="valveCloseOne" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 5%; display: inline;">485通信异常:
+                        <select id="fourTelEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 15%; display: inline;">开盖异常:
+                        <select id="openLidEx" style="margin-left: 10px;width: 150px">
+                            <option value="1" >不清除</option>
+                            <option value="0" >清除</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 28%" class="layui-btn layui-btn-normal layui-btn-xs" onclick="clearEx()">清除异常指令45H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readDeviceStatus()">读终端状态46H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width: 650px;height: 60px;">
+                <legend>系统时钟</legend>
+                <button type="button" style="margin-left: 35%;width: 230px" class="layui-btn layui-btn-normal layui-btn-lg" onclick="systemClock()">读取时钟（06H）</button>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width: 650px;height: 60px;">
+                <legend>ICCID号</legend>
+                <button type="button" style="margin-left: 35%" class="layui-btn layui-btn-normal layui-btn-lg" onclick="iccIDNum()">读SIM卡ICCID号（09H）</button>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>无上报关阀天数</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">无上报关阀天数:
+                        <input type="text" style="margin-left: 3px; width: 120px;  " id="noReportCloseValveDays"  value="30"  />
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 25px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setNoReportCloseDays()">设置无上报关阀天数2BH</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readNoReportCloseDays()">读取无上报关阀天数11H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>无用气关阀天数</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">无用气关阀天数:
+                        <input type="text" style="margin-left: 3px; width: 120px;" id="noUseGasCloseValveDays"  value="60"  />
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 25px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setNoUseGasCloseDays()">设置无用气关阀天数14H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readNoUseGasCloseDays()">读取无用气关阀天数15H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>关阀一次累计气量值</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">关阀类型:
+                        <select id="closeValveType" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_警告性关阀</option>
+                            <option value="01">01H强制性关阀</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">累计气量值:
+                        <input type="text" style="margin-left: 3px; width: 120px;  "  id="totalGas" value="1800.00"  />
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 25px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="setCloseOneTimes()">设置关阀一次累计气量值42H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="redCloseOneTimes()">读取关阀一次累计气量值43H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:240px;">
+                <legend>余量报警额度</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">计量类别:
+                        <select id="meterType" style="margin-left: 3px;width: 120px">
+                            <option value="01">01H_金额计量</option>
+                            <option value="00">00H_气量计量</option>
+                        </select>
+                    </div>
+
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">剩余量1:
+                        <input type="text" style="margin-left: 3px; width: 120px;  " id="surplusOne"  value="100.00"  />
+                    </div>
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">阀控标识1:
+                        <select id="valveOne" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_无动作</option>
+                            <option value="22">22H_警告性关阀</option>
+                            <option value="33">33H_强制性关阀</option>
+                        </select>
+                    </div>
+                </ul>
+
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">剩余量2:
+                        <input type="text" style="margin-left: 3px; width: 120px;  "  id="surplusTwo" value="200.00"  />
+                    </div>
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">阀控标识2:
+                        <select id="valveTwo" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_无动作</option>
+                            <option value="22">22H_警告性关阀</option>
+                            <option value="33">33H_强制性关阀</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">剩余量3:
+                        <input type="text" style="margin-left: 3px; width: 120px;  " id="surplusThree"  value="300.00"  />
+                    </div>
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">阀控标识3:
+                        <select id="valveThree" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_无动作</option>
+                            <option value="22">22H_警告性关阀</option>
+                            <option value="33">33H_强制性关阀</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">剩余量4:
+                        <input type="text" style="margin-left: 3px; width: 120px;  " id="surplusFour"  value="400.00"  />
+                    </div>
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">阀控标识4:
+                        <select id="valveFour" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_无动作</option>
+                            <option value="22">22H_警告性关阀</option>
+                            <option value="3">33H_强制性关阀</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">剩余量5:
+                        <input type="text" style="margin-left: 3px; width: 120px;  "  id="surplusFive" value="500.00"  />
+                    </div>
+                    <div style="margin-top:-8px;  margin-left: 10px; display: inline;">阀控标识5:
+                        <select id="valveFive" style="margin-left: 3px;width: 120px">
+                            <option value="00">00H_无动作</option>
+                            <option value="22">22H_警告性关阀</option>
+                            <option value="3">33H_强制性关阀</option>
+                        </select>
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 25px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="allowAlarmLimit()">设置余量报警额度58H</button>
+                    <button type="button" style="margin-left: 30px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readAllowAlarm()">读取余量报警额度59H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>分体机信息上报</legend>
+                <ul class="equal-2 clear" style="margin-left: 10px;margin-top: 10px;">
+                    <div style="margin-top:-8px; margin-left: 10px; display: inline;">流量计编号:
+                        <input type="text" style="margin-left: 3px; width: 240px;  "  id="flowerNum" value="TH00188190712346225G500L1568"  />
+                    </div>
+                </ul>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 25px" class="layui-btn layui-btn-normal layui-btn-xs" onclick="readReportInfoCommand()">读分体机信息上报信息39H</button>
+                </ul>
+            </fieldset>
+            <fieldset style="margin-left: 15px;width:650px; height:80px;">
+                <legend>下发密钥</legend>
+                <ul style="margin-top: 10px">
+                    <button type="button" style="margin-left: 35%" class="layui-btn layui-btn-normal layui-btn-lg" onclick="keyIssue()">下发密钥08H</button>
+                </ul>
+            </fieldset>
+            </fieldset>
+
+    </div>
+</div>
+<div style="float: left; width: 50%;height: 95%; " >
+
+
+    <div style="width: 100%;height: 100%;overflow-y: auto">
+        <fieldset style="margin-left: 15px;width:93%; height: 100%;">
+            <legend>指令接受及发送日志</legend>
+        <textarea id="responseText" style="width: 100%;height: 100%"> </textarea>
+        </fieldset>
+    </div>
+</div>
+
+</body>
+
+</html>

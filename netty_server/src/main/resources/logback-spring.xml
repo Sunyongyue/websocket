@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="false">
+    <springProperty scop="context" name="spring.application.name" source="spring.application.name" defaultValue="yypt"/>
+    <!--<springProperty scop="context" name="logstash.server" source="logstash.server" defaultValue="localhost"/>-->
+    <!--<springProperty scop="context" name="logstash.port" source="logstash.port" defaultValue="3000"/>-->
+    <property name="log.path" value="logs/${spring.application.name}" />
+    <!-- Console log output -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <withJansi>true</withJansi>
+        <encoder>
+            <!--<pattern>%d %p (%file:%line\)- %m%n</pattern>-->
+            <!--格式化输出：%d:表示日期    %thread:表示线程名     %-5level:级别从左显示5个字符宽度  %msg:日志消息    %n:是换行符-->
+            <pattern>%black() %red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger) - %cyan(%msg%n)</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Log file debug output -->
+    <appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/%d{yyyy-MM}/debug.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date [%thread] %-5level [%logger{50}] %file:%line - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Log file error output -->
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/%d{yyyy-MM}/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date [%thread] %-5level [%logger{50}] %file:%line - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!--<appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
+        <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+            <!--<level>INFO</level>-->
+        <!--</filter>-->
+        <!--<destination>${logstash.server}:${logstash.port}</destination>-->
+        <!--&lt;!&ndash; encoder is required &ndash;&gt;-->
+        <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
+            <!--&lt;!&ndash;<pattern>%date %contextName [%thread] %-5level [%logger{50}] - %msg%n</pattern>&ndash;&gt;-->
+            <!--&lt;!&ndash; <charset>UTF-8</charset>&ndash;&gt;-->
+            <!--<customFields>{"app_name": "${spring.application.name}"}</customFields>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+    <logger name="com.th.netty_server" level="INFO" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="debug" />
+        <!--<appender-ref ref="stash" />-->
+    </logger>
+    <logger name="*.*" level="ERROR" additivity="false">
+        <!--<appender-ref ref="stash" />-->
+        <appender-ref ref="error" />
+    </logger>
+
+    <!-- Level: FATAL 0  ERROR 3  WARN 4  INFO 6  DEBUG 7 -->
+    <root level="INFO">
+        <appender-ref ref="console" />
+        <appender-ref ref="debug" />
+        <appender-ref ref="error" />
+    </root>
+</configuration>
